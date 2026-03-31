@@ -1,0 +1,26 @@
+{
+  "name": "L'eco di Leopardi",
+  "short_name": "EcoLeopardi",
+  "description": "PWA didattica su Giacomo Leopardi con lezioni, video, mappe, quiz e appunti personali.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f2ea",
+  "theme_color": "#21303f",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

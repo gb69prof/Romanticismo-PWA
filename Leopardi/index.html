@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<title>L&#x27;eco di Leopardi · L'eco di Leopardi</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="assets/icons/favicon.png"><link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#21303f"><link rel="stylesheet" href="style.css">
+</head>
+<body data-page="index">
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-head"><h2>L'eco di Leopardi</h2><button class="icon-btn ghost" data-close-sidebar aria-label="Chiudi menu">✕</button></div>
+  <nav class="sidebar-nav"><a href="biografia.html">Biografia e formazione</a>
+<a href="leopardi-romanticismo.html">Leopardi e il Romanticismo</a>
+<a href="filosofia.html">La filosofia base</a>
+<a href="pessimismo-storico.html">Il pessimismo storico</a>
+<a href="pessimismo-cosmico.html">Il pessimismo cosmico</a>
+<a href="conclusione.html">Conclusione</a>
+<a href="quiz.html">Quiz</a>
+<a href="video.html">Video</a>
+<a href="schemi.html">Schemi</a></nav>
+</div>
+<div class="overlay" data-close-sidebar></div>
+<div class="shell"><header class="topbar">
+  <div class="topbar-left"><a class="icon-btn" href="index.html" aria-label="Home">⌂</a><button class="icon-btn" data-open-sidebar aria-label="Apri menu">☰</button></div>
+  <h1>L&#x27;eco di Leopardi</h1>
+  <div class="topbar-right"><button class="icon-btn ghost" id="openNotes" aria-label="Apri appunti">✎</button><a class="icon-btn" href="https://chatgpt.com/g/g-PWnQHYd8S-leopardi-s-echo" target="_blank" rel="noopener" aria-label="Apri chatbot">◎</a></div>
+</header>
+<main class="panel home-main">
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">PWA didattica installabile</p>
+      <h2>Leopardi non come elenco, ma come percorso che si stringe e si apre.</h2>
+      <p>Questa app unisce lezioni, mappe, video, quiz e un piccolo glossario di parole-cerniera. L’idea è semplice: aiutare lo studente a vedere che il pensiero leopardiano non procede per capitoli separati, ma per ritorni, svolte e trasformazioni.</p>
+      <div class="hero-actions">
+        <a class="pill-btn primary" href="biografia.html">Comincia dal principio</a>
+        <a class="pill-btn" href="schemi.html">Apri gli schemi</a>
+        <a class="pill-btn" href="video.html">Guarda i video</a>
+      </div>
+      
+<div class="stats-grid">
+  <div class="stat-card"><span class="kicker">Percorso</span><strong>15 lezioni principali</strong><span>Dal sensismo alla Ginestra, con passaggi, nodi filosofici e testi poetici.</span></div>
+  <div class="stat-card"><span class="kicker">Studio</span><strong>Video, mappe, quiz, appunti</strong><span>Ogni pagina unisce spiegazione, supporti visivi e strumenti di studio attivi.</span></div>
+  <div class="stat-card"><span class="kicker">Avanzamento</span><strong id="courseProgressText">0 di 15 lezioni visitate</strong><div class="progressbar"><span id="courseProgress"></span></div></div>
+</div>
+
+    </div>
+    <div class="hero-cover panel" id="coverBox">
+      <button class="cover-trigger" id="playIntro" aria-label="Apri il video introduttivo">
+        <img src="assets/images/leopardi_ritratto.webp" alt="Ritratto di Giacomo Leopardi">
+        <span>Clicca sul ritratto per aprire il video introduttivo.</span>
+      </button>
+    </div>
+  </section>
+  <section class="home-sections">
+    <div class="section-panel">
+      <h3>Indice del progetto</h3>
+      <div class="home-index">
+        <a href="biografia.html">Biografia</a>
+        <a href="leopardi-romanticismo.html">Leopardi e il Romanticismo</a>
+        <a href="filosofia.html">La filosofia base</a>
+        <a href="pessimismo-storico.html">Il pessimismo storico</a>
+        <a href="pessimismo-cosmico.html">Il pessimismo cosmico</a>
+        <a href="conclusione.html">Conclusione</a>
+        <a href="quiz.html">Quiz</a>
+        <a href="video.html">Video</a>
+        <a href="schemi.html">Schemi</a>
+      </div>
+    </div>
+    <div class="section-panel">
+      <h3>Lezioni</h3>
+      <div class="card-grid"><a class="home-card" href="biografia.html"><span class="kicker">Percorso introduttivo</span><strong>Biografia e formazione</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="leopardi-romanticismo.html"><span class="kicker">Percorso introduttivo</span><strong>Leopardi e il Romanticismo</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="filosofia.html"><span class="kicker">Filosofia</span><strong>La filosofia base</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="sensismo.html"><span class="kicker">Filosofia</span><strong>Il sensismo</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="meccanicismo.html"><span class="kicker">Filosofia</span><strong>Il meccanicismo</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="stoicismo.html"><span class="kicker">Filosofia</span><strong>Lo stoicismo</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="pessimismo-storico.html"><span class="kicker">Pessimismo storico</span><strong>Il pessimismo storico</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="poetica.html"><span class="kicker">Pessimismo storico</span><strong>La poetica del vago e dell’indefinito</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="infinito.html"><span class="kicker">Pessimismo storico</span><strong>L’infinito</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="pessimismo-cosmico.html"><span class="kicker">Pessimismo cosmico</span><strong>Il pessimismo cosmico</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="presa-coscienza.html"><span class="kicker">Pessimismo cosmico</span><strong>La presa di coscienza</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="sconforto.html"><span class="kicker">Pessimismo cosmico</span><strong>Lo sconforto</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="saffo.html"><span class="kicker">Pessimismo cosmico</span><strong>L’ultimo canto di Saffo</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="bruto.html"><span class="kicker">Pessimismo cosmico</span><strong>Bruto minore</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="titanismo.html"><span class="kicker">Pessimismo cosmico</span><strong>Il titanismo e la Ginestra</strong><span>Apri la lezione</span></a>
+<a class="home-card" href="conclusione.html"><span class="kicker">Percorso</span><strong>Conclusione</strong><span>Apri la lezione</span></a></div>
+    </div>
+  </section>
+</main>
+<footer class="site-note">PWA didattica installabile · L'eco di Leopardi</footer>
+</div>
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-header"><strong>Appunti personali</strong><div class="notes-actions"><button class="icon-btn ghost" id="saveNotes" aria-label="Salva appunti">⬇</button><button class="icon-btn ghost" id="closeNotes" aria-label="Chiudi appunti">✕</button></div></div>
+  <textarea id="notesArea" placeholder="Scrivi qui i tuoi appunti..."></textarea>
+  <p class="notes-hint">Gli appunti restano salvati nel browser e puoi esportarli in un file .txt.</p>
+</div>
+<div class="modal" id="glossaryModal">
+  <div class="modal-card">
+    <button class="icon-btn ghost" id="closeGlossary" aria-label="Chiudi glossario">✕</button>
+    <h3 id="glossaryTitle">Parola-cerniera</h3>
+    <p id="glossaryDef"></p>
+    <p class="modal-quote" id="glossaryQuote"></p>
+    <div class="glossary-links" id="glossaryLinks"></div>
+    <button class="pill-btn primary" id="highlightOccurrences">Evidenzia nel testo</button>
+  </div>
+</div>
+<div class="modal" id="imageModal">
+  <div class="image-modal-card">
+    <button class="icon-btn" data-close-image aria-label="Chiudi immagine">✕</button>
+    <img id="imageModalImg" alt="">
+    <div class="image-caption" id="imageModalCaption"></div>
+  </div>
+</div>
+<script src="glossario.js"></script>
+<script src="script.js"></script>
+</body></html>
