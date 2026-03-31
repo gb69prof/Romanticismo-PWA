@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test – Neoclassicismo e Preromanticismo</title>
+<style>
+:root {
+  --bg:#f5f1e8;
+  --card:#fffaf2;
+  --ink:#2d2418;
+  --muted:#6c5a43;
+  --accent:#7c4a1e;
+  --accent2:#c69a63;
+  --ok:#205c36;
+  --bad:#7d1f1f;
+  --border:#dcc7a8;
+}
+* { box-sizing: border-box; }
+body {
+  margin:0; font-family: Georgia, "Times New Roman", serif; color:var(--ink);
+  background: linear-gradient(180deg, #f8f3ea 0%, #efe3d0 100%);
+}
+.container { max-width: 980px; margin: 0 auto; padding: 24px; }
+.hero {
+  background: linear-gradient(135deg, #fffaf2, #f3e3ca);
+  border:1px solid var(--border); border-radius:20px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.06);
+}
+.hero h1 { margin:0 0 10px; font-size: clamp(1.5rem, 3vw, 2.4rem); }
+.hero p { margin:8px 0; color:var(--muted); line-height:1.55; }
+.note { font-size:.95rem; }
+.card {
+  margin-top: 18px; background:var(--card); border:1px solid var(--border);
+  border-radius:18px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+.question-title { font-size:1.15rem; margin:0 0 14px; line-height:1.45; }
+.options { display:grid; gap:10px; }
+.option {
+  border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:#fff;
+  cursor:pointer; transition:.18s ease;
+}
+.option:hover { transform:translateY(-1px); border-color:var(--accent2); }
+.option input { margin-right:10px; }
+.controls { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+button {
+  border:none; border-radius:999px; padding:12px 18px; cursor:pointer;
+  background:var(--accent); color:#fff; font-weight:700; letter-spacing:.2px;
+}
+button.secondary { background:#6e634e; }
+button:disabled { opacity:.55; cursor:not-allowed; }
+.progress { margin-top: 10px; color:var(--muted); font-size:.95rem; }
+.hidden { display:none; }
+.result-summary {
+  display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-top:16px;
+}
+.box {
+  background:#fff; border:1px solid var(--border); border-radius:16px; padding:16px;
+}
+.score { font-size:2rem; font-weight:700; color:var(--accent); }
+.good { color:var(--ok); }
+.bad { color:var(--bad); }
+.lesson-err {
+  border-left:4px solid var(--accent2); padding:12px 14px; background:#fff; border-radius:12px; margin:12px 0;
+}
+.tag {
+  display:inline-block; padding:4px 10px; border-radius:999px; background:#efe1cc; color:#5c472c;
+  font-size:.85rem; margin-bottom:8px;
+}
+.footer { margin-top:24px; color:var(--muted); font-size:.9rem; text-align:center; }
+</style>
+</head>
+<body><button id='focus-toggle'>Focus</button>
+<div class="container">
+  <section class="hero">
+    <h1>Test – Neoclassicismo e Preromanticismo</h1>
+    <p>Test a risposta multipla sulla singola lezione. Ogni domanda ha 4 alternative e una sola risposta corretta.</p>
+    <p class="note">Quando ricarichi la pagina, l’ordine delle domande e delle risposte cambia automaticamente. Alla fine trovi voto, giudizio, consigli di recupero e mini-lezioni solo sugli errori.</p>
+  </section>
+
+  <section class="card" id="quizBox">
+    <div class="progress" id="progress"></div>
+    <div id="questionWrap"></div>
+    <div class="controls">
+      <button id="prevBtn" class="secondary">Indietro</button>
+      <button id="nextBtn">Avanti</button>
+      <button id="finishBtn" class="hidden">Consegna test</button>
+    </div>
+  </section>
+
+  <section class="card hidden" id="resultBox">
+    <h2>Report finale</h2>
+    <div class="result-summary">
+      <div class="box"><div class="tag">Punteggio</div><div class="score" id="scoreText"></div></div>
+      <div class="box"><div class="tag">Voto in decimi</div><div class="score" id="gradeText"></div></div>
+      <div class="box"><div class="tag">Giudizio</div><div id="judgementText"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Consigli per recuperare</h3>
+      <p id="adviceText"></p>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Mini-lezioni sugli errori</h3>
+      <div id="wrongLessons"></div>
+    </div>
+    <div class="controls">
+      <button onclick="location.reload()">Ricarica e rifai il test</button>
+    </div>
+  </section>
+
+  <div class="footer">Test generato per la lezione di Foscolo</div>
+</div>
+
+<script>
+const quizData = {"title": "Test – Neoclassicismo e Preromanticismo", "questions": [{"question": "Quali due correnti si intrecciano nel tempo di Foscolo?", "correct": "Neoclassicismo e Preromanticismo", "options": ["Neoclassicismo e Preromanticismo", "Verismo e Decadentismo", "Futurismo e Simbolismo", "Barocco e Naturalismo"], "lesson": "La lezione mostra come, tra fine Settecento e inizio Ottocento, convivano due spinte diverse ma intrecciate."}, {"question": "Quale evento storico viene indicato come decisivo per il clima dell’epoca?", "correct": "La Rivoluzione francese", "options": ["La Rivoluzione francese", "La guerra di Troia", "La scoperta dell’America", "L’unità d’Italia del 1861"], "lesson": "Il 1789 è uno degli sfondi storici fondamentali del periodo trattato."}, {"question": "Che cosa cerca il Neoclassicismo?", "correct": "Armonia e bellezza ideale", "options": ["Armonia e bellezza ideale", "Disordine e frammentazione", "Linguaggio quotidiano e cronaca", "Comicità popolare"], "lesson": "Il Neoclassicismo viene descritto come tensione verso misura, equilibrio e ideale di bellezza."}, {"question": "Che cosa esplora il Preromanticismo?", "correct": "L’inquietudine dell’animo e la forza delle passioni", "options": ["L’inquietudine dell’animo e la forza delle passioni", "Solo la rigida imitazione dei classici", "Il gusto per la burocrazia", "L’indifferenza ai sentimenti"], "lesson": "Il Preromanticismo mette al centro interiorità, turbamento e natura potente."}, {"question": "Quale coppia di opposti organizza la lezione?", "correct": "Ordine e inquietudine", "options": ["Ordine e inquietudine", "Silenzio e rumore", "Pace e guerra", "Centro e periferia"], "lesson": "Il testo insiste sul contrasto fra razionalità e sentimento, misura e crisi."}, {"question": "Perché le due correnti possono convivere in Foscolo?", "correct": "Perché in lui forma classica e tensione interiore si uniscono", "options": ["Perché in lui forma classica e tensione interiore si uniscono", "Perché rifiuta ogni tradizione", "Perché copia un solo modello medievale", "Perché abbandona del tutto la poesia"], "lesson": "Foscolo tiene insieme controllo formale e dramma interiore."}, {"question": "Quale rapporto ha il Neoclassicismo con il mondo antico?", "correct": "Lo assume come modello di bellezza", "options": ["Lo assume come modello di bellezza", "Lo rifiuta in blocco", "Lo considera inutile", "Lo riduce a folclore"], "lesson": "Il richiamo ai classici appartiene all’orizzonte neoclassico."}, {"question": "Quale immagine della natura si avvicina di più al Preromanticismo?", "correct": "Natura travolgente e inquietante", "options": ["Natura travolgente e inquietante", "Natura sempre serena e decorativa", "Natura irrilevante", "Natura solo matematica"], "lesson": "Nel Preromanticismo la natura non è solo sfondo armonico ma forza che coinvolge l’io."}, {"question": "Quale definizione si adatta meglio a Foscolo in questa lezione?", "correct": "Autore di confine tra due sensibilità", "options": ["Autore di confine tra due sensibilità", "Poeta esclusivamente arcadico", "Narratore verista puro", "Drammaturgo futurista"], "lesson": "La lezione sottolinea la posizione di Foscolo come figura di passaggio."}, {"question": "Quale crisi storica favorisce la nascita di questa tensione culturale?", "correct": "La crisi degli ideali illuministici", "options": ["La crisi degli ideali illuministici", "La fine dell’età della pietra", "La nascita della televisione", "La diffusione del romanzo poliziesco"], "lesson": "La delusione storica e politica alimenta il passaggio verso nuove forme di sensibilità."}]};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const data = shuffle(quizData.questions).map((q, idx) => {
+  const shuffledOptions = shuffle(q.options);
+  return { ...q, shuffledOptions, userAnswer: null, id: idx };
+});
+
+let current = 0;
+
+const progress = document.getElementById('progress');
+const wrap = document.getElementById('questionWrap');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const finishBtn = document.getElementById('finishBtn');
+
+function renderQuestion() {
+  const q = data[current];
+  progress.textContent = `Domanda ${current + 1} di ${data.length}`;
+  wrap.innerHTML = `
+    <h2 class="question-title">${q.question}</h2>
+    <div class="options">
+      ${q.shuffledOptions.map((opt) => `
+        <label class="option">
+          <input type="radio" name="answer" value="${opt.replaceAll('"','&quot;')}" ${q.userAnswer === opt ? 'checked' : ''}>
+          <span>${opt}</span>
+        </label>
+      `).join('')}
+    </div>
+  `;
+  document.querySelectorAll('input[name="answer"]').forEach(el => {
+    el.addEventListener('change', e => {
+      q.userAnswer = e.target.value;
+      updateButtons();
+    });
+  });
+  updateButtons();
+}
+
+function updateButtons() {
+  prevBtn.disabled = current === 0;
+  nextBtn.classList.toggle('hidden', current === data.length - 1);
+  finishBtn.classList.toggle('hidden', current !== data.length - 1);
+}
+
+prevBtn.addEventListener('click', () => {
+  if (current > 0) {
+    current--;
+    renderQuestion();
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (current < data.length - 1) {
+    current++;
+    renderQuestion();
+  }
+});
+
+finishBtn.addEventListener('click', () => {
+  const unanswered = data.filter(q => !q.userAnswer).length;
+  if (unanswered > 0) {
+    const ok = confirm(`Ci sono ancora ${unanswered} domande senza risposta. Vuoi consegnare comunque?`);
+    if (!ok) return;
+  }
+  showResults();
+});
+
+function buildJudgement(score10) {
+  if (score10 === 10) return "Eccellente: hai una padronanza molto solida della lezione.";
+  if (score10 >= 8) return "Molto buono: conosci bene i nuclei fondamentali, con poche incertezze.";
+  if (score10 >= 6) return "Sufficiente: la base c’è, ma alcuni passaggi vanno fissati meglio.";
+  if (score10 >= 4) return "Insufficiente: hai colto solo una parte dei contenuti, serve recupero mirato.";
+  return "Gravemente insufficiente: devi ricostruire i punti essenziali della lezione con maggiore attenzione.";
+}
+
+function buildAdvice(score10, wrongCount) {
+  if (score10 >= 8) {
+    return "Rileggi comunque i punti in cui hai sbagliato: ti basta consolidare date, concetti chiave e collegamenti.";
+  }
+  if (score10 >= 6) {
+    return "Ripassa soprattutto i nuclei che confondi: titolo dell’opera, temi centrali, date e funzione dei concetti principali. Poi rifai subito il test.";
+  }
+  if (score10 >= 4) {
+    return "Non devi ristudiare tutto nello stesso modo: concentrati prima sugli errori, ricostruisci il lessico essenziale e prova a spiegare ad alta voce ogni risposta giusta.";
+  }
+  return "Serve un recupero netto: riparti dalla lezione, evidenzia parole chiave, crea una mappa minima e poi rifai il test. Senza questa base, continuerai a confondere i concetti.";
+}
+
+function showResults() {
+  const wrong = [];
+  let correctCount = 0;
+
+  data.forEach(q => {
+    if (q.userAnswer === q.correct) {
+      correctCount++;
+    } else {
+      wrong.push(q);
+    }
+  });
+
+  const score10 = Math.round((correctCount / data.length) * 100) / 10;
+  document.getElementById('scoreText').textContent = `${correctCount}/${data.length}`;
+  document.getElementById('gradeText').textContent = score10.toFixed(1);
+  document.getElementById('judgementText').textContent = buildJudgement(score10);
+  document.getElementById('adviceText').textContent = buildAdvice(score10, wrong.length);
+
+  const wrongLessons = document.getElementById('wrongLessons');
+  if (wrong.length === 0) {
+    wrongLessons.innerHTML = '<p class="good">Nessun errore: non ci sono mini-lezioni da recuperare.</p>';
+  } else {
+    wrongLessons.innerHTML = wrong.map((q, i) => `
+      <div class="lesson-err">
+        <div class="tag">Errore ${i + 1}</div>
+        <p><strong>Domanda:</strong> ${q.question}</p>
+        <p class="bad"><strong>Tua risposta:</strong> ${q.userAnswer ?? 'Nessuna risposta'}</p>
+        <p class="good"><strong>Risposta corretta:</strong> ${q.correct}</p>
+        <p><strong>Mini-lezione:</strong> ${q.lesson}</p>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('quizBox').classList.add('hidden');
+  document.getElementById('resultBox').classList.remove('hidden');
+}
+
+renderQuestion();
+</script>
+<script src='highlight.js'></script></body>
+</html>
