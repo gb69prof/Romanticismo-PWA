@@ -136,13 +136,13 @@
     savedBox.className='saved-highlights-box';
     savedBox.innerHTML=`
       <div class="saved-head">
-        <strong>Passaggi evidenziati</strong>
+        <strong>Raccolta passaggi</strong>
         <div class="saved-head-actions">
           <button class="pill-btn primary small" id="savePendingHighlights" type="button">Salva evidenziazioni</button>
           <button class="pill-btn small" id="clearAllHighlights" type="button">Azzera</button>
         </div>
       </div>
-      <p class="notes-hint compact">Puoi leggere, evidenziare più brani e salvarli tutti insieme solo alla fine.</p>
+      <p class="notes-hint compact">Leggi e raccogli i passaggi in attesa, poi salvali tutti insieme solo alla fine.</p>
       <p class="notes-hint compact highlight-tech-note">Le evidenziazioni vengono ancorate alla posizione reale del testo, non solo alla frase.</p>
       <div id="savedHighlightsPanel" class="saved-highlights-list"></div>
     `;
@@ -152,21 +152,31 @@
   function renderSavedHighlights(){
     const panel=document.getElementById('savedHighlightsPanel');
     if(!panel) return;
-    const items=[
-      ...pendingHighlights.map(item=>({...item, status:'pending'})),
-      ...notesState.savedHighlights.map(item=>({...item, status:'saved'}))
-    ];
-    if(!items.length){
+    const pendingItems=pendingHighlights.map(item=>({...item, status:'pending'}));
+    const savedItems=notesState.savedHighlights.map(item=>({...item, status:'saved'}));
+    if(!pendingItems.length && !savedItems.length){
       panel.innerHTML='<p class="notes-empty">Nessun passaggio raccolto per questa pagina.</p>';
       return;
     }
-    panel.innerHTML=items.map(item=>`
+    function card(item){
+      return `
       <article class="saved-highlight-card ${item.status}">
         <div class="saved-highlight-meta">${item.status==='pending' ? 'In attesa di salvataggio' : 'Salvato negli appunti'}</div>
         <p>${escapeHtml(item.text)}</p>
         <button class="text-btn" type="button" data-remove-highlight-id="${item.id}" data-status="${item.status}">Rimuovi</button>
       </article>
-    `).join('');
+      `;
+    }
+    panel.innerHTML=`
+      <section class="highlight-group pending-group">
+        <div class="highlight-group-head">In attesa (${pendingItems.length})</div>
+        ${pendingItems.length ? pendingItems.map(card).join('') : '<p class="notes-empty compact">Nessun passaggio in attesa.</p>'}
+      </section>
+      <section class="highlight-group saved-group">
+        <div class="highlight-group-head">Salvati (${savedItems.length})</div>
+        ${savedItems.length ? savedItems.map(card).join('') : '<p class="notes-empty compact">Nessun passaggio salvato.</p>'}
+      </section>
+    `;
   }
 
   function removeHighlightById(id, status){
@@ -528,6 +538,19 @@
     toolbar.className='selection-toolbar';
     toolbar.innerHTML='<button type="button" class="pill-btn primary small" id="markSelectionBtn">Evidenzia</button><button type="button" class="pill-btn small" id="cancelSelectionBtn">Annulla</button>';
     document.body.appendChild(toolbar);
+    let cachedSelection=null;
+    let actionInFlight=false;
+    let lastActionAt=0;
+
+    function makeSelectionSnapshot(range, text){
+      const anchor=rangeToAnchor(range);
+      if(!anchor) return null;
+      return {
+        text: normalizeText(text || range.toString()),
+        anchor,
+        timestamp: Date.now()
+      };
+    }
 
     function hideToolbar(){
       toolbar.classList.remove('show');
@@ -542,38 +565,104 @@
       if(!selectionInsideValidArea(range)) return null;
       const text=normalizeText(sel.toString());
       if(!text || text.length < 2) return null;
-      const anchor=rangeToAnchor(range);
-      if(!anchor) return null;
-      return { sel, range, text, anchor };
+      return { sel, range, text };
+    }
+
+    function getSelectionCandidate(){
+      const live=getValidSelection();
+      if(live){
+        const snap=makeSelectionSnapshot(live.range, live.text);
+        if(snap) cachedSelection=snap;
+        return snap;
+      }
+      if(cachedSelection && cachedSelection.text && cachedSelection.anchor){
+        return cachedSelection;
+      }
+      return null;
+    }
+
+    function isRecentAction(){
+      const now=Date.now();
+      if(actionInFlight) return true;
+      if(now-lastActionAt < 420) return true;
+      actionInFlight=true;
+      lastActionAt=now;
+      window.setTimeout(()=>{ actionInFlight=false; }, 420);
+      return false;
+    }
+
+    function updateToolbarMode(){
+      toolbar.classList.toggle('selection-toolbar-mobile', window.matchMedia('(max-width: 860px)').matches);
     }
 
     function placeToolbar(){
       const data=getValidSelection();
-      if(!data){ hideToolbar(); return; }
+      if(!data){
+        if(cachedSelection){
+          updateToolbarMode();
+          toolbar.classList.add('show');
+          return;
+        }
+        hideToolbar();
+        return;
+      }
+      const snap=makeSelectionSnapshot(data.range, data.text);
+      if(snap) cachedSelection=snap;
       const rect=data.range.getBoundingClientRect();
+      updateToolbarMode();
       toolbar.style.left=Math.max(12, rect.left + window.scrollX)+'px';
       toolbar.style.top=Math.max(12, rect.top + window.scrollY - 54)+'px';
       toolbar.classList.add('show');
     }
 
-    document.addEventListener('selectionchange',()=>window.requestAnimationFrame(placeToolbar));
+    document.addEventListener('selectionchange',()=>{
+      window.requestAnimationFrame(()=>{
+        const live=getValidSelection();
+        if(live){
+          const snap=makeSelectionSnapshot(live.range, live.text);
+          if(snap) cachedSelection=snap;
+        }
+        placeToolbar();
+      });
+    });
     window.addEventListener('scroll',()=>{ if(toolbar.classList.contains('show')) placeToolbar(); }, {passive:true});
     window.addEventListener('resize',()=>{ if(toolbar.classList.contains('show')) placeToolbar(); });
-    document.getElementById('cancelSelectionBtn')?.addEventListener('click',()=>{ window.getSelection()?.removeAllRanges(); hideToolbar(); });
-    document.getElementById('markSelectionBtn')?.addEventListener('click',()=>{
-      const data=getValidSelection();
-      if(!data) return;
-      const candidate={ id: uid(), text: data.text, anchor: data.anchor };
+    const cancelBtn=document.getElementById('cancelSelectionBtn');
+    const markBtn=document.getElementById('markSelectionBtn');
+    cancelBtn?.addEventListener('click',()=>{
+      window.getSelection()?.removeAllRanges();
+      cachedSelection=null;
+      hideToolbar();
+    });
+
+    function handleHighlightAction(evt){
+      evt?.preventDefault?.();
+      evt?.stopPropagation?.();
+      if(isRecentAction()) return;
+      const selection=getSelectionCandidate();
+      if(!selection) return;
+      const candidate={ id: uid(), text: selection.text, anchor: selection.anchor };
       const all=[...pendingHighlights, ...notesState.savedHighlights];
       if(!all.some(item=>isSameHighlight(item, candidate))){
         pendingHighlights.push(candidate);
         persistNotes();
         reapplyHighlights();
       }
-      data.sel.removeAllRanges();
+      cachedSelection=null;
+      window.getSelection()?.removeAllRanges();
       hideToolbar();
       openNotesPanel();
-    });
+    }
+
+    markBtn?.addEventListener('pointerdown',handleHighlightAction);
+    markBtn?.addEventListener('click',handleHighlightAction);
+    toolbar.addEventListener('pointerdown',e=>e.stopPropagation());
+
+    document.addEventListener('pointerdown',e=>{
+      if(toolbar.contains(e.target)) return;
+      if(e.target.closest('.notes-panel, .modal')) return;
+      if(!window.getSelection()?.toString().trim()) cachedSelection=null;
+    }, {passive:true});
   }
 
   reapplyHighlights();
