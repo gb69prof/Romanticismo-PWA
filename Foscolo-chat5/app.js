@@ -437,6 +437,10 @@ function initStudyHighlighter(root) {
   const page = document.body.dataset.page || location.pathname.split('/').pop() || 'pagina';
   const storageKey = `foscolo-highlights::${page}`;
   let statusTimer = null;
+  let lastSelectionPieces = [];
+  let lastSelectionTimestamp = 0;
+  let selectionDebounceTimer = null;
+  const isTouchDevice = window.matchMedia?.('(pointer: coarse)')?.matches || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
   const status = (msg) => {
     const api = window.FOSCOLO_NOTES_API;
@@ -636,8 +640,42 @@ function initStudyHighlighter(root) {
     return pieces;
   };
 
-  const addHighlightFromSelection = () => {
+  const clonePieces = (pieces = []) => pieces.map(piece => ({ ...piece }));
+
+  const updateSelectionFab = (visible) => {
+    if (!isTouchDevice) return;
+    const fab = document.querySelector('[data-action="highlight-selection-fab"]');
+    if (!fab) return;
+    fab.hidden = !visible;
+    fab.classList.toggle('show', !!visible);
+  };
+
+  const captureSelectionSnapshot = () => {
     const pieces = getSelectedPieces();
+    if (pieces.length) {
+      lastSelectionPieces = clonePieces(pieces);
+      lastSelectionTimestamp = Date.now();
+      updateSelectionFab(true);
+      return pieces;
+    }
+    updateSelectionFab(false);
+    return [];
+  };
+
+  const getCachedSelectionPieces = () => {
+    if (!lastSelectionPieces.length) return [];
+    const tooOld = Date.now() - lastSelectionTimestamp > 1000 * 60 * 8;
+    if (tooOld) {
+      lastSelectionPieces = [];
+      updateSelectionFab(false);
+      return [];
+    }
+    return clonePieces(lastSelectionPieces);
+  };
+
+  const addHighlightFromSelection = (options = {}) => {
+    const livePieces = options.preferCached ? [] : getSelectedPieces();
+    const pieces = livePieces.length ? livePieces : getCachedSelectionPieces();
     if (!pieces.length) {
       status('Prima seleziona un passaggio del testo');
       return;
@@ -658,6 +696,8 @@ function initStudyHighlighter(root) {
     rerender();
     status(added === 1 ? 'Passaggio evidenziato' : `${added} passaggi evidenziati`);
     try { window.getSelection()?.removeAllRanges(); } catch {}
+    lastSelectionPieces = [];
+    updateSelectionFab(false);
   };
 
   const savePendingHighlights = () => {
@@ -703,6 +743,38 @@ function initStudyHighlighter(root) {
       }
     }
   });
+
+  const debouncedSelectionCapture = () => {
+    clearTimeout(selectionDebounceTimer);
+    selectionDebounceTimer = setTimeout(() => captureSelectionSnapshot(), 30);
+  };
+
+  document.addEventListener('selectionchange', debouncedSelectionCapture);
+  document.addEventListener('mouseup', debouncedSelectionCapture);
+  document.addEventListener('touchend', debouncedSelectionCapture, { passive: true });
+  document.addEventListener('keyup', debouncedSelectionCapture);
+
+  const earlyCaptureForHighlightTap = (event) => {
+    const actionBtn = event.target.closest?.('[data-action="highlight-selection"], [data-action="highlight-selection-fab"]');
+    if (!actionBtn) return;
+    captureSelectionSnapshot();
+  };
+  document.addEventListener('pointerdown', earlyCaptureForHighlightTap);
+  document.addEventListener('touchstart', earlyCaptureForHighlightTap, { passive: true });
+
+  const selectionFab = document.createElement('button');
+  selectionFab.type = 'button';
+  selectionFab.className = 'study-selection-fab';
+  selectionFab.dataset.action = 'highlight-selection-fab';
+  selectionFab.textContent = 'Evidenzia';
+  selectionFab.hidden = true;
+  selectionFab.addEventListener('pointerdown', () => captureSelectionSnapshot());
+  selectionFab.addEventListener('touchstart', () => captureSelectionSnapshot(), { passive: true });
+  selectionFab.addEventListener('click', (event) => {
+    event.preventDefault();
+    addHighlightFromSelection({ preferCached: true });
+  });
+  if (isTouchDevice) document.body.appendChild(selectionFab);
 
   window.addEventListener('foscolo:save-pending-highlights', savePendingHighlights);
   rerender();
